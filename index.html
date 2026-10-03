@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#111418" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <title>RIO Observer</title>
+  </head>
+  <body>
+    <main>
+      <section id="view-capture">
+        <div id="camera">
+          <video id="video" autoplay playsinline muted></video>
+          <div id="frame"></div>
+        </div>
+        <p id="camera-error" class="notice" hidden></p>
+        <p class="hint">Cadrez le RIO dans le rectangle. La photo entière est conservée.</p>
+        <label id="zoom-row" hidden>
+          Zoom
+          <input id="zoom" type="range" />
+        </label>
+        <div class="actions">
+          <button id="shutter" class="primary">Capturer</button>
+          <label class="button">
+            Importer une photo
+            <input id="import" type="file" accept="image/*" hidden />
+          </label>
+          <label class="button">
+            Analyser une vidéo
+            <input id="video-import" type="file" accept="video/*" hidden />
+          </label>
+        </div>
+      </section>
+
+      <section id="view-journal" hidden>
+        <p id="journal-empty" class="hint">Aucune observation enregistrée.</p>
+        <ul id="journal-list"></ul>
+        <label id="journal-export-option" class="check">
+          <input id="journal-export-original" type="checkbox" />
+          Exporter les originaux, sans floutage (autorités, avocat)
+        </label>
+        <div class="actions">
+          <button id="export-all">Tout exporter (ZIP)</button>
+        </div>
+      </section>
+
+      <section id="view-video" hidden>
+        <p id="video-name" class="hint"></p>
+        <div id="player-viewport">
+          <video id="player" playsinline preload="auto"></video>
+        </div>
+        <div id="player-controls">
+          <button id="player-toggle">Lecture</button>
+          <input id="player-seek" type="range" min="0" max="1" step="0.05" value="0" aria-label="Position dans la vidéo" />
+          <span id="player-time">0:00 / 0:00</span>
+        </div>
+        <label>
+          Zoom
+          <input id="player-zoom" type="range" min="1" max="8" step="0.25" value="1" />
+        </label>
+        <p class="hint">Zoomez puis faites glisser l’image pour cadrer un agent éloigné.</p>
+
+        <h2>Relever un RIO</h2>
+        <div class="actions">
+          <button id="video-read-zone">Lire le RIO dans la zone affichée</button>
+          <button id="video-scan">Chercher les RIO dans toute la vidéo</button>
+          <button id="video-stop" hidden>Arrêter la recherche</button>
+        </div>
+        <label class="check">
+          <input id="video-deep" type="checkbox" />
+          Recherche approfondie pour les agents éloignés (beaucoup plus lente)
+        </label>
+        <progress id="video-progress" max="1" value="0" hidden></progress>
+        <p id="video-status" class="hint"></p>
+        <ul id="video-results"></ul>
+
+        <h2>Agent sans RIO</h2>
+        <p class="hint">
+          Marquez les instants utiles : l’agent sans numéro, la plaque d’un véhicule, un marquage d’unité, les faits.
+          Si l’image est zoomée, la zone affichée est gardée en plus de l’image entière.
+        </p>
+        <label>
+          Ce que montre l’image
+          <select id="mark-label">
+            <option>Agent sans RIO visible</option>
+            <option>Plaque ou marquage de véhicule</option>
+            <option>Marquage d’unité (casque, dos, écusson)</option>
+            <option>Faits</option>
+            <option>Autre élément</option>
+          </select>
+        </label>
+        <div class="actions">
+          <button id="video-mark">Marquer cet instant</button>
+        </div>
+        <ul id="video-marks"></ul>
+        <div class="actions">
+          <button id="video-create" class="primary" hidden></button>
+        </div>
+      </section>
+
+      <section id="view-detail" hidden>
+        <div id="detail-photos"></div>
+        <p id="blur-status" class="hint"></p>
+        <label class="check"><input id="detail-show-original" type="checkbox" /> Afficher les originaux, sans floutage</label>
+        <dl>
+          <dt>Enregistré le</dt>
+          <dd id="detail-date"></dd>
+          <dt>Position de l’appareil</dt>
+          <dd id="detail-position"></dd>
+        </dl>
+
+        <fieldset>
+          <legend>Identification</legend>
+          <label><input type="radio" name="status" value="lu" /> RIO lu</label>
+          <label><input type="radio" name="status" value="illisible" /> RIO illisible</label>
+          <label><input type="radio" name="status" value="absent" /> RIO non porté ou masqué</label>
+        </fieldset>
+
+        <label>
+          Numéro RIO (7 chiffres)
+          <input id="detail-rio" inputmode="numeric" maxlength="7" pattern="\d{7}" autocomplete="off" />
+        </label>
+        <p id="ocr-status" class="hint"></p>
+        <div id="ocr-candidates"></div>
+
+        <h2>Fiche</h2>
+        <p class="hint">
+          Ces éléments permettent aux autorités de retrouver l’agent, même sans numéro. Ils pré-remplissent le brouillon
+          de signalement joint à l’export.
+        </p>
+        <label>
+          Date et heure des faits
+          <input data-field="factsAt" type="datetime-local" />
+        </label>
+        <label>
+          Lieu des faits
+          <input data-field="place" autocomplete="off" placeholder="Adresse, carrefour, repère…" />
+        </label>
+        <label>
+          Unité ou service
+          <input data-field="unitType" list="unit-types" autocomplete="off" placeholder="CRS, gendarmerie mobile, BAC…" />
+          <datalist id="unit-types">
+            <option value="Police nationale"></option>
+            <option value="CRS"></option>
+            <option value="Gendarmerie mobile"></option>
+            <option value="Gendarmerie départementale"></option>
+            <option value="BAC"></option>
+            <option value="BRAV-M"></option>
+            <option value="Police municipale"></option>
+            <option value="Inconnu"></option>
+          </datalist>
+        </label>
+        <label>
+          Marquages
+          <input data-field="markings" autocomplete="off" placeholder="Casque, dos, écusson, grade…" />
+        </label>
+        <label>
+          Véhicule
+          <input data-field="plate" autocomplete="off" placeholder="Plaque, marquage, modèle…" />
+        </label>
+        <label>
+          Demande orale du numéro
+          <select data-field="rioRequest">
+            <option value="">Non renseigné</option>
+            <option value="non-demande">Numéro non demandé à l’agent</option>
+            <option value="donne">Numéro demandé, communiqué oralement</option>
+            <option value="refuse">Numéro demandé, refus de le communiquer</option>
+          </select>
+        </label>
+        <label>
+          Description des faits
+          <textarea data-field="notes" rows="5"></textarea>
+        </label>
+        <label>
+          Témoins
+          <textarea data-field="witnesses" rows="3" placeholder="Noms et coordonnées, avec leur accord"></textarea>
+        </label>
+
+        <label class="check">
+          <input id="detail-export-original" type="checkbox" />
+          Exporter les originaux, sans floutage (autorités, avocat)
+        </label>
+        <div class="actions">
+          <button id="detail-export" class="primary">Exporter</button>
+          <button id="detail-delete" class="danger">Supprimer</button>
+        </div>
+      </section>
+    </main>
+
+    <nav>
+      <button data-view="capture">Capture</button>
+      <button data-view="journal">Journal</button>
+    </nav>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
