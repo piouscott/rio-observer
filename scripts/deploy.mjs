@@ -1,6 +1,6 @@
 // Publie le dossier dist sur la branche gh-pages du dépôt (GitHub Pages).
 // La branche ne garde pas d'historique : chaque publication remplace la précédente.
-import { execFileSync } from 'node:child_process'
+import { execFileSync, execSync } from 'node:child_process'
 import { rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -12,7 +12,8 @@ const read = (cwd, ...args) => execFileSync(args[0], args.slice(1), { cwd, encod
 
 const remote = read(root, 'git', 'remote', 'get-url', 'origin')
 
-run(root, 'npm', 'run', 'build')
+// Par le shell : sous Windows, npm est un script .cmd qu'execFileSync ne sait pas lancer.
+execSync('npm run build', { cwd: root, stdio: 'inherit' })
 // Sans ce fichier, GitHub Pages passe le site dans Jekyll.
 writeFileSync(join(dist, '.nojekyll'), '')
 
