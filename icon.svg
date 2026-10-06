@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#111418"/>
+  <rect x="76" y="196" width="360" height="120" rx="16" fill="none" stroke="#f2c14e" stroke-width="20"/>
+  <text x="256" y="286" text-anchor="middle" font-family="monospace" font-weight="700" font-size="84" fill="#e8ecf1">RIO</text>
+</svg>

@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#111418" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <title>RIO Observer</title>
+    <script type="module" crossorigin src="./assets/index-CbChg0Qg.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-D0IzV9ZO.css">
+  </head>
+  <body>
+    <main>
+      <section id="view-capture">
+        <div id="camera">
+          <video id="video" autoplay playsinline muted></video>
+          <div id="frame"></div>
+        </div>
+        <p id="camera-error" class="notice" hidden></p>
+        <p class="hint">Cadrez le RIO dans le rectangle. La photo entière est conservée.</p>
+        <label id="zoom-row" hidden>
+          Zoom
+          <input id="zoom" type="range" />
+        </label>
+        <div class="actions">
+          <button id="shutter" class="primary">Capturer</button>
+          <label class="button">
+            Importer une photo
+            <input id="import" type="file" accept="image/*" hidden />
+          </label>
+          <label class="button">
+            Analyser une vidéo
+            <input id="video-import" type="file" accept="video/*" hidden />
+          </label>
+        </div>
+      </section>
+
+      <section id="view-journal" hidden>
+        <p id="journal-empty" class="hint">Aucune observation enregistrée.</p>
+        <ul id="journal-list"></ul>
+        <label id="journal-export-option" class="check">
+          <input id="journal-export-original" type="checkbox" />
+          Exporter les originaux, sans floutage (autorités, avocat)
+        </label>
+        <div class="actions">
+          <button id="export-all">Tout exporter (ZIP)</button>
+        </div>
+      </section>
+
+      <section id="view-video" hidden>
+        <p id="video-name" class="hint"></p>
+        <div id="player-viewport">
+          <video id="player" playsinline preload="auto"></video>
+        </div>
+        <div id="player-controls">
+          <button id="player-toggle">Lecture</button>
+          <input id="player-seek" type="range" min="0" max="1" step="0.05" value="0" aria-label="Position dans la vidéo" />
+          <span id="player-time">0:00 / 0:00</span>
+        </div>
+        <label>
+          Zoom
+          <input id="player-zoom" type="range" min="1" max="8" step="0.25" value="1" />
+        </label>
+        <p class="hint">Zoomez puis faites glisser l’image pour cadrer un agent éloigné.</p>
+
+        <h2>Relever un RIO</h2>
+        <div class="actions">
+          <button id="video-read-zone">Lire le RIO dans la zone affichée</button>
+          <button id="video-scan">Chercher les RIO dans toute la vidéo</button>
+          <button id="video-stop" hidden>Arrêter la recherche</button>
+        </div>
+        <label class="check">
+          <input id="video-deep" type="checkbox" />
+          Recherche approfondie pour les agents éloignés (beaucoup plus lente)
+        </label>
+        <progress id="video-progress" max="1" value="0" hidden></progress>
+        <p id="video-status" class="hint"></p>
+        <ul id="video-results"></ul>
+
+        <h2>Agent sans RIO</h2>
+        <p class="hint">
+          Marquez les instants utiles : l’agent sans numéro, la plaque d’un véhicule, un marquage d’unité, les faits.
+          Si l’image est zoomée, la zone affichée est gardée en plus de l’image entière.
+        </p>
+        <label>
+          Ce que montre l’image
+          <select id="mark-label">
+            <option>Agent sans RIO visible</option>
+            <option>Plaque ou marquage de véhicule</option>
+            <option>Marquage d’unité (casque, dos, écusson)</option>
+            <option>Faits</option>
+            <option>Autre élément</option>
+          </select>
+        </label>
+        <div class="actions">
+          <button id="video-mark">Marquer cet instant</button>
+        </div>
+        <ul id="video-marks"></ul>
+        <div class="actions">
+          <button id="video-create" class="primary" hidden></button>
+        </div>
+      </section>
+
+      <section id="view-guide" hidden>
+        <h2>Le droit / la pratique</h2>
+        <p><strong>En France, filmer la police est un droit.</strong> Aucun agent ne peut vous l’interdire, vous obliger à effacer vos images ou prendre votre téléphone sans décision de justice.</p>
+        <p class="hint">En pratique, ce droit ne vous protège pas sur le moment : filmer la police, c’est parfois courir un risque. Ce guide aide à le réduire.</p>
+
+        <h2>Avant de sortir</h2>
+        <label class="check"><input type="checkbox" /> Code de déverrouillage à six chiffres, pas visage ni empreinte</label>
+        <label class="check"><input type="checkbox" /> Savoir lancer la caméra depuis l’écran verrouillé</label>
+        <label class="check"><input type="checkbox" /> Chiffrement activé</label>
+        <label class="check"><input type="checkbox" /> Localisation et effacement à distance prêts</label>
+
+        <h2>Pour votre sécurité</h2>
+        <p><strong>Gardez vos distances.</strong> Restez à plusieurs mètres de la scène.</p>
+        <p><strong>Filmez à plusieurs.</strong> Si vous voyez quelqu’un filmer, filmez aussi, d’un autre angle : ça protège cette personne et ça multiplie les points de vue.</p>
+        <p><strong>Évitez le direct.</strong> Le live expose votre position, votre identité et les visages des personnes présentes.</p>
+
+        <h2>Conseils pour filmer</h2>
+        <p><strong>Filmez en continu</strong>, sans couper avant la fin de l’action.</p>
+        <p><strong>Filmez en plan large</strong> : personnes en entier, espace autour, repère de lieu.</p>
+        <p><strong>À l’horizontale, à deux mains, sans zoom.</strong> L’image est plus stable et vous gardez un œil sur ce qui vous entoure.</p>
+
+        <h2>Juste après</h2>
+        <p><strong>Ne publiez pas tout de suite.</strong> Les personnes identifiables sur vos images peuvent être mises en danger. Des policiers identifiables pourraient vous poursuivre.</p>
+        <p><strong>Gardez l’original</strong> : ni filtre, ni texte, ni renommage. La version originale est celle qui vaut le plus comme preuve.</p>
+
+        <h2>Envoyer à Index</h2>
+        <p>Index est une ONG spécialisée dans les violences policières : <strong>+33 6 95 44 90 20</strong> (Signal ou WhatsApp). Envoyez le fichier en « Document » pour garder ses métadonnées. Index conserve les images sur un serveur sécurisé et ne communique jamais votre identité.</p>
+        <p class="hint">Source : guide « Filmer la police » d’Index (index.ngo), version résumée.</p>
+      </section>
+
+      <section id="view-film" hidden>
+        <p class="hint">Les fichiers restent sur votre téléphone, rien n’est envoyé automatiquement.</p>
+        <div class="actions">
+          <button id="film-start" class="primary">● Caméra guidée</button>
+          <label class="button">
+            Caméra native
+            <input id="film-native" type="file" accept="video/*" capture="environment" hidden />
+          </label>
+          <label class="button">
+            Importer une vidéo
+            <input id="film-import" type="file" accept="video/*" multiple hidden />
+          </label>
+        </div>
+        <p class="hint">La caméra native garde les métadonnées d’origine : à préférer comme preuve.</p>
+        <p class="hint">
+          Téléphone verrouillé : une application web ne peut pas se lancer depuis l’écran verrouillé. Filmez avec la
+          caméra du téléphone (souvent deux appuis rapides sur le bouton d’allumage), puis mettez la vidéo au coffre
+          avec « Importer une vidéo ».
+        </p>
+        <label class="check"><input id="film-geo" type="checkbox" /> Noter la position GPS sur la fiche du fichier</label>
+
+        <h2>Coffre</h2>
+        <p id="film-vault-empty" class="hint">Aucun fichier.</p>
+        <ul id="film-vault"></ul>
+        <div class="actions"><button id="film-wipe" class="danger" hidden>Tout effacer du coffre</button></div>
+        <p class="hint">« Envoyer » ouvre le partage du téléphone (Signal). Pour WhatsApp : « Enregistrer », puis joignez en <strong>Document</strong>.</p>
+      </section>
+
+      <section id="view-detail" hidden>
+        <div id="detail-photos"></div>
+        <p id="blur-status" class="hint"></p>
+        <label class="check"><input id="detail-show-original" type="checkbox" /> Afficher les originaux, sans floutage</label>
+        <dl>
+          <dt>Enregistré le</dt>
+          <dd id="detail-date"></dd>
+          <dt>Position de l’appareil</dt>
+          <dd id="detail-position"></dd>
+        </dl>
+
+        <fieldset>
+          <legend>Identification</legend>
+          <label><input type="radio" name="status" value="lu" /> RIO lu</label>
+          <label><input type="radio" name="status" value="illisible" /> RIO illisible</label>
+          <label><input type="radio" name="status" value="absent" /> RIO non porté ou masqué</label>
+        </fieldset>
+
+        <label>
+          Numéro RIO (7 chiffres)
+          <input id="detail-rio" inputmode="numeric" maxlength="7" pattern="\d{7}" autocomplete="off" />
+        </label>
+        <p id="ocr-status" class="hint"></p>
+        <div id="ocr-candidates"></div>
+
+        <h2>Fiche</h2>
+        <p class="hint">
+          Ces éléments permettent aux autorités de retrouver l’agent, même sans numéro. Ils pré-remplissent le brouillon
+          de signalement joint à l’export.
+        </p>
+        <label>
+          Date et heure des faits
+          <input data-field="factsAt" type="datetime-local" />
+        </label>
+        <label>
+          Lieu des faits
+          <input data-field="place" autocomplete="off" placeholder="Adresse, carrefour, repère…" />
+        </label>
+        <label>
+          Unité ou service
+          <input data-field="unitType" list="unit-types" autocomplete="off" placeholder="CRS, gendarmerie mobile, BAC…" />
+          <datalist id="unit-types">
+            <option value="Police nationale"></option>
+            <option value="CRS"></option>
+            <option value="Gendarmerie mobile"></option>
+            <option value="Gendarmerie départementale"></option>
+            <option value="BAC"></option>
+            <option value="BRAV-M"></option>
+            <option value="Police municipale"></option>
+            <option value="Inconnu"></option>
+          </datalist>
+        </label>
+        <label>
+          Marquages
+          <input data-field="markings" autocomplete="off" placeholder="Casque, dos, écusson, grade…" />
+        </label>
+        <label>
+          Véhicule
+          <input data-field="plate" autocomplete="off" placeholder="Plaque, marquage, modèle…" />
+        </label>
+        <label>
+          Demande orale du numéro
+          <select data-field="rioRequest">
+            <option value="">Non renseigné</option>
+            <option value="non-demande">Numéro non demandé à l’agent</option>
+            <option value="donne">Numéro demandé, communiqué oralement</option>
+            <option value="refuse">Numéro demandé, refus de le communiquer</option>
+          </select>
+        </label>
+        <label>
+          Description des faits
+          <textarea data-field="notes" rows="5"></textarea>
+        </label>
+        <label>
+          Témoins
+          <textarea data-field="witnesses" rows="3" placeholder="Noms et coordonnées, avec leur accord"></textarea>
+        </label>
+
+        <label class="check">
+          <input id="detail-export-original" type="checkbox" />
+          Exporter les originaux, sans floutage (autorités, avocat)
+        </label>
+        <div class="actions">
+          <button id="detail-export" class="primary">Exporter</button>
+          <button id="detail-delete" class="danger">Supprimer</button>
+        </div>
+      </section>
+    </main>
+
+    <div id="cam" hidden>
+      <video id="cam-preview" playsinline muted autoplay></video>
+      <div id="cam-rotate">↻ Tournez le téléphone à l’horizontale</div>
+      <div id="cam-hint"></div>
+      <div id="cam-timer">00:00</div>
+      <div id="cam-buttons">
+        <button id="cam-close" aria-label="Fermer">✕</button>
+        <button id="cam-rec" aria-label="Enregistrer"></button>
+        <span></span>
+      </div>
+    </div>
+
+    <nav>
+      <button data-view="capture">Capture</button>
+      <button data-view="film">Filmer</button>
+      <button data-view="guide">Guide</button>
+      <button data-view="journal">Journal</button>
+    </nav>
+
+  </body>
+</html>
