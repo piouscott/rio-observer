@@ -21,6 +21,7 @@ const $ = (id) => document.getElementById(id)
 const views = ['capture', 'film', 'guide', 'journal', 'detail', 'video']
 
 let stream = null
+let currentView = null
 let lastPosition = null
 let current = null
 let photoUrls = []
@@ -29,6 +30,7 @@ let photoRun = 0
 // --- Navigation ---
 
 function show(view) {
+  currentView = view
   for (const name of views) $(`view-${name}`).hidden = name !== view
   for (const button of document.querySelectorAll('nav button')) {
     button.classList.toggle('active', button.dataset.view === view)
@@ -50,18 +52,27 @@ for (const button of document.querySelectorAll('nav button')) {
 async function startCamera() {
   if (stream) return
   $('camera-error').hidden = true
+  let acquired
   try {
-    stream = await navigator.mediaDevices.getUserMedia({
+    acquired = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: { ideal: 'environment' }, width: { ideal: 3840 }, height: { ideal: 2160 } },
       audio: false,
     })
   } catch (error) {
+    if (currentView !== 'capture') return
     $('camera-error').textContent =
       `Caméra indisponible (${error.name}). Vous pouvez importer une photo prise avec l'appareil photo.`
     $('camera-error').hidden = false
     $('shutter').disabled = true
     return
   }
+  // L'onglet a changé pendant l'ouverture : la caméra doit être rendue, sinon elle reste
+  // occupée et la caméra guidée de l'onglet Filmer ne peut plus l'ouvrir.
+  if (currentView !== 'capture' || stream) {
+    for (const track of acquired.getTracks()) track.stop()
+    return
+  }
+  stream = acquired
   $('video').srcObject = stream
   $('shutter').disabled = false
   setupZoom(stream.getVideoTracks()[0])

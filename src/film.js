@@ -231,15 +231,42 @@ let wakeLock = null
 
 const updateOrientation = () => $('cam').classList.toggle('portrait', innerHeight > innerWidth)
 
-async function openCamera() {
+const VIDEO_CONSTRAINTS = { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+// Délai laissé au téléphone pour libérer la caméra que l'onglet Capture vient de quitter.
+const CAMERA_RELEASE_MS = 700
+
+const CAMERA_ERRORS = {
+  NotAllowedError:
+    'Accès à la caméra refusé. Ouvrez les réglages du site (cadenas à côté de l’adresse, ou « Paramètres du site »), autorisez Caméra et Micro, puis rechargez la page.',
+  NotReadableError: 'Caméra occupée par une autre application ou un autre onglet. Fermez-les, puis réessayez.',
+  NotFoundError: 'Aucune caméra trouvée sur cet appareil.',
+}
+
+async function acquireCamera(audio) {
+  const constraints = { video: VIDEO_CONSTRAINTS, audio }
   try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
-      audio: true,
-    })
+    return await navigator.mediaDevices.getUserMedia(constraints)
   } catch (error) {
-    alert(`Caméra ou micro refusé (${error.name}).`)
-    return
+    if (error.name !== 'NotReadableError' && error.name !== 'AbortError') throw error
+    await new Promise((resolve) => setTimeout(resolve, CAMERA_RELEASE_MS))
+    return navigator.mediaDevices.getUserMedia(constraints)
+  }
+}
+
+async function openCamera() {
+  let hints = HINTS
+  try {
+    stream = await acquireCamera(true)
+  } catch (error) {
+    console.error(error)
+    // Micro refusé ou indisponible : mieux vaut une vidéo sans son que pas de vidéo.
+    try {
+      stream = await acquireCamera(false)
+      hints = ['⚠ Micro indisponible : la vidéo sera sans son', ...HINTS]
+    } catch {
+      alert(CAMERA_ERRORS[error.name] ?? `Caméra indisponible (${error.name}).`)
+      return
+    }
   }
   $('cam-preview').srcObject = stream
   $('cam').hidden = false
@@ -256,8 +283,9 @@ async function openCamera() {
   }
   updateOrientation()
   $('cam-timer').textContent = '00:00'
-  $('cam-hint').textContent = HINTS[0]
-  hintTimer = setInterval(() => ($('cam-hint').textContent = HINTS[++hintIndex % HINTS.length]), 6000)
+  hintIndex = 0
+  $('cam-hint').textContent = hints[0]
+  hintTimer = setInterval(() => ($('cam-hint').textContent = hints[++hintIndex % hints.length]), 6000)
 }
 
 function closeCamera() {
