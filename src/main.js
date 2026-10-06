@@ -5,6 +5,7 @@ import { exportObservations } from './export.js'
 import { blurredPhoto, unblurAt } from './faces.js'
 import { STATUS_LABELS, FORM_FIELDS, createObservation, makeImage, imagesOf, toJpeg, formatTime } from './observations.js'
 import { initVideoView, openVideo, closeVideo } from './video-view.js'
+import { initFilm, refreshVault } from './film.js'
 
 // Zone de lecture du RIO, en fractions de l'image vidéo.
 const CROP = { x: 0.2, y: 0.4, w: 0.6, h: 0.2 }
@@ -17,7 +18,7 @@ const DATE_CAVEATS = {
 }
 
 const $ = (id) => document.getElementById(id)
-const views = ['capture', 'journal', 'detail', 'video']
+const views = ['capture', 'film', 'guide', 'journal', 'detail', 'video']
 
 let stream = null
 let lastPosition = null
@@ -35,6 +36,7 @@ function show(view) {
   if (view === 'capture') startCamera()
   else stopCamera()
   if (view === 'journal') renderJournal()
+  if (view === 'film') refreshVault()
   if (view !== 'detail') closeDetail()
   if (view !== 'video') closeVideo()
 }
@@ -364,6 +366,12 @@ $('export-all').addEventListener('click', async (event) => {
 // --- Démarrage ---
 
 initVideoView({ onObservationCreated: openDetail })
+initFilm({
+  onAnalyse: (file) => {
+    show('video')
+    openVideo(file)
+  },
+})
 
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`)

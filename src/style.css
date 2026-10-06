@@ -347,11 +347,142 @@ nav button {
   border: 0;
   border-radius: 0;
   background: none;
-  padding: 16px;
+  padding: 16px 4px;
   color: var(--muted);
 }
 
 nav button.active {
   color: var(--accent);
   font-weight: 600;
+}
+
+/* Guide */
+#view-guide h2,
+#view-film h2 {
+  margin: 8px 0 0;
+  color: var(--accent);
+  font-size: 1.1rem;
+  text-transform: uppercase;
+}
+
+#view-guide p {
+  margin: 0;
+}
+
+/* Coffre */
+#film-vault {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#film-vault li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+#film-vault .mono {
+  color: var(--muted);
+  font-size: 0.7rem;
+  word-break: break-all;
+}
+
+/* Caméra guidée */
+#cam {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: #000;
+}
+
+#cam[hidden] {
+  display: none;
+}
+
+#cam-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+#cam-rotate {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  background: rgb(0 0 0 / 80%);
+  color: var(--accent);
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+#cam.portrait #cam-rotate {
+  display: flex;
+}
+
+#cam-hint,
+#cam-timer {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top));
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgb(0 0 0 / 65%);
+}
+
+#cam-hint {
+  left: 12px;
+  right: 110px;
+  font-weight: 600;
+}
+
+#cam-timer {
+  right: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+#cam.recording #cam-timer {
+  background: #c0272d;
+}
+
+#cam-buttons {
+  position: absolute;
+  inset: auto 0 calc(16px + env(safe-area-inset-bottom)) 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+#cam-buttons > * {
+  width: 56px;
+  height: 56px;
+}
+
+#cam-buttons button {
+  border-radius: 50%;
+  padding: 0;
+  background: rgb(0 0 0 / 65%);
+}
+
+#cam-buttons #cam-rec {
+  width: 76px;
+  height: 76px;
+  border: 5px solid #fff;
+  background: #d33;
+}
+
+#cam.recording #cam-rec {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
 }

@@ -1,6 +1,6 @@
 // Écran vidéo : lecteur avec zoom, relevé des RIO, et marquage d'instants pour un agent sans RIO.
 import { readRio } from './ocr.js'
-import { scanVideo, MAX_DEEP_FRAME_WIDTH } from './video.js'
+import { scanVideo, ensureDuration, MAX_DEEP_FRAME_WIDTH } from './video.js'
 import { createObservation, makeImage, toJpeg, formatTime } from './observations.js'
 
 // Un numéro lu une seule fois dans toute la vidéo est presque toujours un faux.
@@ -334,8 +334,14 @@ export function initVideoView(callbacks) {
   onObservationCreated = callbacks.onObservationCreated
   const player = $('player')
 
-  player.addEventListener('loadedmetadata', () => {
+  player.addEventListener('loadedmetadata', async () => {
     $('player-viewport').style.aspectRatio = `${player.videoWidth} / ${player.videoHeight}`
+    try {
+      await ensureDuration(player)
+    } catch (error) {
+      console.error(error)
+      return
+    }
     $('player-seek').max = player.duration
     updateTime()
   })

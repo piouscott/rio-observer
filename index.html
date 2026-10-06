@@ -100,6 +100,64 @@
         </div>
       </section>
 
+      <section id="view-guide" hidden>
+        <h2>Le droit / la pratique</h2>
+        <p><strong>En France, filmer la police est un droit.</strong> Aucun agent ne peut vous l’interdire, vous obliger à effacer vos images ou prendre votre téléphone sans décision de justice.</p>
+        <p class="hint">En pratique, ce droit ne vous protège pas sur le moment : filmer la police, c’est parfois courir un risque. Ce guide aide à le réduire.</p>
+
+        <h2>Avant de sortir</h2>
+        <label class="check"><input type="checkbox" /> Code de déverrouillage à six chiffres, pas visage ni empreinte</label>
+        <label class="check"><input type="checkbox" /> Savoir lancer la caméra depuis l’écran verrouillé</label>
+        <label class="check"><input type="checkbox" /> Chiffrement activé</label>
+        <label class="check"><input type="checkbox" /> Localisation et effacement à distance prêts</label>
+
+        <h2>Pour votre sécurité</h2>
+        <p><strong>Gardez vos distances.</strong> Restez à plusieurs mètres de la scène.</p>
+        <p><strong>Filmez à plusieurs.</strong> Si vous voyez quelqu’un filmer, filmez aussi, d’un autre angle : ça protège cette personne et ça multiplie les points de vue.</p>
+        <p><strong>Évitez le direct.</strong> Le live expose votre position, votre identité et les visages des personnes présentes.</p>
+
+        <h2>Conseils pour filmer</h2>
+        <p><strong>Filmez en continu</strong>, sans couper avant la fin de l’action.</p>
+        <p><strong>Filmez en plan large</strong> : personnes en entier, espace autour, repère de lieu.</p>
+        <p><strong>À l’horizontale, à deux mains, sans zoom.</strong> L’image est plus stable et vous gardez un œil sur ce qui vous entoure.</p>
+
+        <h2>Juste après</h2>
+        <p><strong>Ne publiez pas tout de suite.</strong> Les personnes identifiables sur vos images peuvent être mises en danger. Des policiers identifiables pourraient vous poursuivre.</p>
+        <p><strong>Gardez l’original</strong> : ni filtre, ni texte, ni renommage. La version originale est celle qui vaut le plus comme preuve.</p>
+
+        <h2>Envoyer à Index</h2>
+        <p>Index est une ONG spécialisée dans les violences policières : <strong>+33 6 95 44 90 20</strong> (Signal ou WhatsApp). Envoyez le fichier en « Document » pour garder ses métadonnées. Index conserve les images sur un serveur sécurisé et ne communique jamais votre identité.</p>
+        <p class="hint">Source : guide « Filmer la police » d’Index (index.ngo), version résumée.</p>
+      </section>
+
+      <section id="view-film" hidden>
+        <p class="hint">Les fichiers restent sur votre téléphone, rien n’est envoyé automatiquement.</p>
+        <div class="actions">
+          <button id="film-start" class="primary">● Caméra guidée</button>
+          <label class="button">
+            Caméra native
+            <input id="film-native" type="file" accept="video/*" capture="environment" hidden />
+          </label>
+          <label class="button">
+            Importer une vidéo
+            <input id="film-import" type="file" accept="video/*" multiple hidden />
+          </label>
+        </div>
+        <p class="hint">La caméra native garde les métadonnées d’origine : à préférer comme preuve.</p>
+        <p class="hint">
+          Téléphone verrouillé : une application web ne peut pas se lancer depuis l’écran verrouillé. Filmez avec la
+          caméra du téléphone (souvent deux appuis rapides sur le bouton d’allumage), puis mettez la vidéo au coffre
+          avec « Importer une vidéo ».
+        </p>
+        <label class="check"><input id="film-geo" type="checkbox" /> Noter la position GPS sur la fiche du fichier</label>
+
+        <h2>Coffre</h2>
+        <p id="film-vault-empty" class="hint">Aucun fichier.</p>
+        <ul id="film-vault"></ul>
+        <div class="actions"><button id="film-wipe" class="danger" hidden>Tout effacer du coffre</button></div>
+        <p class="hint">« Envoyer » ouvre le partage du téléphone (Signal). Pour WhatsApp : « Enregistrer », puis joignez en <strong>Document</strong>.</p>
+      </section>
+
       <section id="view-detail" hidden>
         <div id="detail-photos"></div>
         <p id="blur-status" class="hint"></p>
@@ -189,8 +247,22 @@
       </section>
     </main>
 
+    <div id="cam" hidden>
+      <video id="cam-preview" playsinline muted autoplay></video>
+      <div id="cam-rotate">↻ Tournez le téléphone à l’horizontale</div>
+      <div id="cam-hint"></div>
+      <div id="cam-timer">00:00</div>
+      <div id="cam-buttons">
+        <button id="cam-close" aria-label="Fermer">✕</button>
+        <button id="cam-rec" aria-label="Enregistrer"></button>
+        <span></span>
+      </div>
+    </div>
+
     <nav>
       <button data-view="capture">Capture</button>
+      <button data-view="film">Filmer</button>
+      <button data-view="guide">Guide</button>
       <button data-view="journal">Journal</button>
     </nav>
 

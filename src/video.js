@@ -23,6 +23,26 @@ function once(target, event, timeoutMs) {
   })
 }
 
+// Une vidéo enregistrée par le navigateur (webm de la caméra guidée) n'annonce pas sa durée.
+// Demander une position très lointaine oblige le lecteur à la calculer ; on revient ensuite au début.
+export async function ensureDuration(video) {
+  if (Number.isFinite(video.duration)) return
+  const known = new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('Durée de la vidéo inconnue')), SEEK_TIMEOUT_MS * 2)
+    video.addEventListener('durationchange', function check() {
+      if (!Number.isFinite(video.duration)) return
+      video.removeEventListener('durationchange', check)
+      clearTimeout(timer)
+      resolve()
+    })
+  })
+  video.currentTime = Number.MAX_SAFE_INTEGER
+  await known
+  const seeked = once(video, 'seeked', SEEK_TIMEOUT_MS)
+  video.currentTime = 0
+  await seeked
+}
+
 // Appelle `onSighting({ rio, reads, box, time, frame })` pour chaque numéro lu dans une image
 // (`frame` est le canevas de l'image, réutilisé d'une image à l'autre : le copier pour le garder)
 // et `onProgress(secondes analysées, durée)` après chaque image. S'arrête si `signal` est annulé.
@@ -36,7 +56,7 @@ export async function scanVideo(file, { onSighting, onProgress, signal, deep = f
 
   try {
     await once(video, 'loadeddata', SEEK_TIMEOUT_MS * 2)
-    if (!Number.isFinite(video.duration)) throw new Error('Durée de la vidéo inconnue')
+    await ensureDuration(video)
 
     const scale = Math.min(1, (deep ? MAX_DEEP_FRAME_WIDTH : MAX_FRAME_WIDTH) / video.videoWidth)
     const frame = document.createElement('canvas')
