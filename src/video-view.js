@@ -68,9 +68,15 @@ function setZoom(zoom) {
   viewport.scrollTop = centerY * player.clientHeight - viewport.clientHeight / 2
 }
 
+let seeking = false
+
 function updateTime() {
   const player = $('player')
-  $('player-seek').value = player.currentTime
+  // La durée annoncée peut être corrigée en cours de lecture (vidéos enregistrées par le
+  // navigateur) : la barre suit la durée du moment, pas celle lue à l'ouverture.
+  if (Number.isFinite(player.duration)) $('player-seek').max = player.duration
+  // Pendant qu'on déplace le curseur, il appartient au doigt : la lecture ne le ramène pas en arrière.
+  if (!seeking) $('player-seek').value = player.currentTime
   $('player-time').textContent = `${formatTime(player.currentTime)} / ${formatTime(player.duration || 0)}`
 }
 
@@ -342,15 +348,24 @@ export function initVideoView(callbacks) {
       console.error(error)
       return
     }
-    $('player-seek').max = player.duration
     updateTime()
   })
   player.addEventListener('timeupdate', updateTime)
+  player.addEventListener('durationchange', updateTime)
+  // Fin atteinte avant la durée annoncée : la vraie durée est celle-ci.
+  player.addEventListener('ended', () => {
+    $('player-seek').max = player.currentTime
+    updateTime()
+  })
   player.addEventListener('play', () => ($('player-toggle').textContent = 'Pause'))
   player.addEventListener('pause', () => ($('player-toggle').textContent = 'Lecture'))
 
   $('player-toggle').addEventListener('click', () => (player.paused ? player.play() : player.pause()))
-  $('player-seek').addEventListener('input', (event) => (player.currentTime = Number(event.target.value)))
+  $('player-seek').addEventListener('input', (event) => {
+    seeking = true
+    player.currentTime = Number(event.target.value)
+  })
+  $('player-seek').addEventListener('change', () => (seeking = false))
   $('player-zoom').addEventListener('input', (event) => setZoom(Number(event.target.value)))
 
   $('video-read-zone').addEventListener('click', readZone)
