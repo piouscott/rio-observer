@@ -259,13 +259,21 @@ async function openCamera() {
     stream = await acquireCamera(true)
   } catch (error) {
     console.error(error)
-    // Micro refusé ou indisponible : mieux vaut une vidéo sans son que pas de vidéo.
+    // La demande groupée échoue sans dire si c'est la caméra ou le micro : on ouvre la caméra
+    // seule, puis le micro à part, pour savoir lequel pose problème.
     try {
       stream = await acquireCamera(false)
-      hints = ['⚠ Micro indisponible : la vidéo sera sans son', ...HINTS]
     } catch {
       alert(CAMERA_ERRORS[error.name] ?? `Caméra indisponible (${error.name}).`)
       return
+    }
+    try {
+      const microphone = await navigator.mediaDevices.getUserMedia({ audio: true })
+      for (const track of microphone.getAudioTracks()) stream.addTrack(track)
+    } catch (audioError) {
+      console.error(audioError)
+      // Mieux vaut une vidéo sans son que pas de vidéo. Le détail aide à régler le téléphone.
+      hints = [`⚠ Micro indisponible, vidéo sans son (${audioError.name} : ${audioError.message})`, ...HINTS]
     }
   }
   $('cam-preview').srcObject = stream
